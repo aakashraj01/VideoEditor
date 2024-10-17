@@ -23,12 +23,15 @@ export class Store {
   animations: Animation[]
   animationTimeLine: anime.AnimeTimelineInstance;
   playing: boolean;
+  isHexPickerOpen: boolean;
 
   currentKeyFrame: number;
   fps: number;
 
   possibleVideoFormats: string[] = ['mp4', 'webm'];
   selectedVideoFormat: 'mp4' | 'webm';
+  selectedShapeColor = "grey";
+  selectedTextColor = "white";
 
   constructor() {
     this.canvas = null;
@@ -39,6 +42,7 @@ export class Store {
     this.backgroundColor = '#111111';
     this.maxTime = 30 * 1000;
     this.playing = false;
+    this.isHexPickerOpen = false;
     this.currentKeyFrame = 0;
     this.selectedElement = null;
     this.fps = 60;
@@ -57,6 +61,10 @@ export class Store {
     this.currentKeyFrame = Math.floor(time / 1000 * this.fps);
   }
 
+  setIsHexPickerOpen(isOpen: boolean) {
+    this.isHexPickerOpen = isOpen;
+  }
+
   setSelectedMenuOption(selectedMenuOption: MenuOption) {
     this.selectedMenuOption = selectedMenuOption;
   }
@@ -65,6 +73,26 @@ export class Store {
     this.canvas = canvas;
     if (canvas) {
       canvas.backgroundColor = this.backgroundColor;
+    }
+  }
+
+  setSelectedShapeColor = (color: string) => {
+    this.selectedShapeColor = color;
+    if (this.selectedElement && this.selectedElement.type === 'shape') {
+      this.selectedElement.properties.color = color;  // Update the color in properties
+      if (this.selectedElement.fabricObject) {
+        this.selectedElement.fabricObject.set({ fill: color });
+      }
+    }
+  }
+
+  setSelectedTextColor = (color: string) => {
+    this.selectedTextColor = color;
+    if (this.selectedElement && this.selectedElement.type === 'text') {
+      this.selectedElement.properties.color = color;  
+      if (this.selectedElement.fabricObject) {
+        this.selectedElement.fabricObject.set({ fill: color });
+      }
     }
   }
 
@@ -88,14 +116,14 @@ export class Store {
     this.videos = videos;
   }
 
-  createShape(element) {
+  createShape(element: ShapeEditorElement) {
     const options = {
       left: element.placement.x,
       top: element.placement.y,
       scaleX: element.placement.scaleX,
       scaleY: element.placement.scaleY,
       angle: element.placement.rotation,
-      fill: 'grey'
+      fill: element.properties.color || 'grey'    
     };
   
     switch (element.properties.shapeType) {
@@ -133,6 +161,26 @@ export class Store {
   addAnimation(animation: Animation) {
     this.animations = [...this.animations, animation];
     this.refreshAnimations();
+  }
+
+  setCanvasAspectRatio(aspectRatio: string) {
+    debugger
+    if (!this.canvas) return;
+  
+    const width = this.canvas.getWidth();
+    const height = this.canvas.getHeight();
+
+    let newHeight = 0
+    let newWidth = 0
+    if (aspectRatio === "16/9") {
+      newWidth = height * 16/9; 
+      newHeight = height; 
+    } else if (aspectRatio === "9/16") {
+      newWidth = height * 9 / 16; 
+      newHeight = height; // Portrait
+    }
+  
+    this.canvas.setDimensions({ width: newWidth, height: newHeight });
   }
   updateAnimation(id: string, animation: Animation) {
     const index = this.animations.findIndex((a) => a.id === id);
@@ -572,6 +620,7 @@ export class Store {
   addText(options: {
     text: string,
     fontSize: number,
+    color: string,
     fontWeight: number,
   }) {
     const id = getUid();
@@ -598,6 +647,7 @@ export class Store {
           text: options.text,
           fontSize: options.fontSize,
           fontWeight: options.fontWeight,
+          color: options.color || '#ffffff',
           splittedTexts: [],
         },
       },
@@ -774,6 +824,7 @@ export class Store {
     if (!store.canvas) return;
     const canvas = store.canvas;
     store.canvas.remove(...store.canvas.getObjects());
+    this.isHexPickerOpen = false;
     for (let index = 0; index < store.editorElements.length; index++) {
       const element = store.editorElements[index];
       switch (element.type) {
@@ -960,7 +1011,7 @@ export class Store {
             objectCaching: false,
             selectable: true,
             lockUniScaling: true,
-            fill: "#ffffff",
+            fill: element.properties.color,
           });
           element.fabricObject = textObject;
           canvas.add(textObject);

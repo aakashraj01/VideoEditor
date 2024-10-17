@@ -22,6 +22,7 @@ export type ShapeEditorElement = EditorElementBase<
   "shape",
   {
     shapeType: string;
+    color: string;
     elementId: string;
     effect: Effect;
   }
@@ -36,6 +37,7 @@ export type TextEditorElement = EditorElementBase<
   {
     text: string;
     fontSize: number;
+    color: string;
     fontWeight: number;
     splittedTexts: fabric.Text[];
   }

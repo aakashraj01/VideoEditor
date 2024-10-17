@@ -101,20 +101,20 @@ const MENU_OPTIONS = [
       store.setSelectedMenuOption("Animation");
     },
   },
-  {
-    name: "Effect",
-    icon: MdMovieFilter,
-    action: (store: Store) => {
-      store.setSelectedMenuOption("Effect");
-    },
-  },
-  {
-    name: "Fill",
-    icon: MdOutlineFormatColorFill,
-    action: (store: Store) => {
-      store.setSelectedMenuOption("Fill");
-    },
-  },
+  // {
+  //   name: "Effect",
+  //   icon: MdMovieFilter,
+  //   action: (store: Store) => {
+  //     store.setSelectedMenuOption("Effect");
+  //   },
+  // },
+  // {
+  //   name: "Fill",
+  //   icon: MdOutlineFormatColorFill,
+  //   action: (store: Store) => {
+  //     store.setSelectedMenuOption("Fill");
+  //   },
+  // },
   {
     name: "Export",
     icon: MdDownload,
