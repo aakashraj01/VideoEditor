@@ -18,6 +18,7 @@ export const Canvas = observer(({ selectedElement }) => {
         height: initialHeight,
         width: initialWidth,
         backgroundColor: "#ededed",
+        selection: true
         });
     
         // Setup drag and drop

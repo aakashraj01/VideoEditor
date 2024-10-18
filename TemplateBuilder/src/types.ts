@@ -24,6 +24,7 @@ export type ShapeEditorElement = EditorElementBase<
     shapeType: string;
     color: string;
     elementId: string;
+    opacity: number;
     effect: Effect;
   }
 >;
@@ -37,8 +38,12 @@ export type TextEditorElement = EditorElementBase<
   {
     text: string;
     fontSize: number;
+    fontFamily: string;
     color: string;
-    fontWeight: number;
+    fontWeight: string;
+    fontStyle: string;
+    opacity: number;
+    textDecoration: string;
     splittedTexts: fabric.Text[];
   }
 >;

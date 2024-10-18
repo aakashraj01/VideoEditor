@@ -6,6 +6,7 @@ import { MenuOption, EditorElement, Animation, TimeFrame, VideoEditorElement, Au
 import { FabricUitls } from '@/utils/fabric-utils';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { toBlobURL } from '@ffmpeg/util';
+import FontFaceObserver from 'fontfaceobserver';
 
 export class Store {
   canvas: fabric.Canvas | null
@@ -32,6 +33,12 @@ export class Store {
   selectedVideoFormat: 'mp4' | 'webm';
   selectedShapeColor = "grey";
   selectedTextColor = "white";
+  selectedTextFont = "Montserrat";
+  selectedTextFontSize = 16;
+  selectedTextFontWeight = "normal";
+  selectedTextFontStyle = "normal";
+  selectedTextTextDecoration = "underline";
+  selectedOpacity = 100;
 
   constructor() {
     this.canvas = null;
@@ -67,6 +74,7 @@ export class Store {
 
   setSelectedMenuOption(selectedMenuOption: MenuOption) {
     this.selectedMenuOption = selectedMenuOption;
+    this.setIsHexPickerOpen(false);
   }
 
   setCanvas(canvas: fabric.Canvas | null) {
@@ -93,6 +101,74 @@ export class Store {
       if (this.selectedElement.fabricObject) {
         this.selectedElement.fabricObject.set({ fill: color });
       }
+    }
+  }
+
+  setSelectedTextFont = (fontFamily: string) => {
+    const loader = new FontFaceObserver(fontFamily);
+
+    loader.load().then(() => {
+        this.selectedTextFont = fontFamily;
+        if (this.selectedElement && this.selectedElement.type === 'text') {
+            this.selectedElement.properties.fontFamily = fontFamily;  
+            if (this.selectedElement.fabricObject) {
+                this.selectedElement.fabricObject.set({ fontFamily: fontFamily });
+            }
+        }
+    }).catch((e) => {
+        console.error(`Failed to load the font: ${fontFamily}`, e);
+    });
+}
+
+  setSelectedTextFontSize = (fontSize: number) => {
+    this.selectedTextFontSize = fontSize;
+    if (this.selectedElement && this.selectedElement.type === 'text') {
+      this.selectedElement.properties.fontSize = fontSize;  
+      if (this.selectedElement.fabricObject) {
+        this.selectedElement.fabricObject.set({ fontSize: fontSize });
+      }
+    }
+  }
+
+  setSelectedTextFontWeight = (fontWeight: string) => {
+    this.selectedTextFontWeight = fontWeight;
+    if (this.selectedElement && this.selectedElement.type === 'text') {
+      this.selectedElement.properties.fontWeight = fontWeight;  
+      if (this.selectedElement.fabricObject) {
+        this.selectedElement.fabricObject.set({ fontWeight: fontWeight });
+      }
+    }
+  }
+
+  setSelectedTextFontStyle = (fontStyle: string) => {
+    this.selectedTextFontStyle = fontStyle;
+    if (this.selectedElement && this.selectedElement.type === 'text') {
+      this.selectedElement.properties.fontStyle = fontStyle;  
+      if (this.selectedElement.fabricObject) {
+        this.selectedElement.fabricObject.set({ fontStyle: fontStyle });
+      }
+    }
+  }
+
+  setSelectedTextTextDecoration = (textDecoration: string) => {
+    this.selectedTextTextDecoration = textDecoration;
+    if (this.selectedElement && this.selectedElement.type === 'text') {
+      this.selectedElement.properties.textDecoration = textDecoration;  
+      if (this.selectedElement.fabricObject) {
+        this.selectedElement.fabricObject.set({ textDecoration: textDecoration });
+      }
+    }
+  }
+
+  setSelectedOpacity = (opacity: number, elementType: string) => {
+    if (this.selectedElement && this.selectedElement.type === elementType) {
+        const normalizedOpacity = opacity / 100;
+        this.selectedElement.properties.opacity = normalizedOpacity;
+        
+        // If the fabricObject exists, set its opacity
+        if (this.selectedElement.fabricObject) {
+            this.selectedElement.fabricObject.set({ opacity: normalizedOpacity });
+        }
     }
   }
 
@@ -123,7 +199,8 @@ export class Store {
       scaleX: element.placement.scaleX,
       scaleY: element.placement.scaleY,
       angle: element.placement.rotation,
-      fill: element.properties.color || 'grey'    
+      fill: element.properties.color || 'grey',
+      opacity: element.properties.opacity || 100,
     };
   
     switch (element.properties.shapeType) {
@@ -620,8 +697,12 @@ export class Store {
   addText(options: {
     text: string,
     fontSize: number,
+    fontFamily: string,
     color: string,
-    fontWeight: number,
+    fontWeight: string,
+    fontStyle: string,
+    opacity: number,
+    textDecoration: string,
   }) {
     const id = getUid();
     const index = this.editorElements.length;
@@ -646,8 +727,12 @@ export class Store {
         properties: {
           text: options.text,
           fontSize: options.fontSize,
+          fontFamily: options.fontFamily || 'Montserrat',
           fontWeight: options.fontWeight,
           color: options.color || '#ffffff',
+          fontStyle: options.fontStyle || 'normal',
+          opacity: options.opacity,
+          textDecoration: options.textDecoration || 'none',
           splittedTexts: [],
         },
       },
@@ -1008,6 +1093,10 @@ export class Store {
             angle: element.placement.rotation,
             fontSize: element.properties.fontSize,
             fontWeight: element.properties.fontWeight,
+            fontFamily: element.properties.fontFamily,
+            fontStyle: element.properties.fontStyle,
+            opacity: element.properties.opacity,
+            textDecoration: element.properties.textDecoration,
             objectCaching: false,
             selectable: true,
             lockUniScaling: true,
